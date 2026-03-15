@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-LinkedInMcp.Worker-d9bec800-bc3a-4ff5-bac2-421834c81937</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LinkedInMcp.Core\LinkedInMcp.Core.csproj" />
+    <ProjectReference Include="..\LinkedInMcp.ServiceDefaults\LinkedInMcp.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

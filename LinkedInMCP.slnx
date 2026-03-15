@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LinkedInMcp.AppHost/LinkedInMcp.AppHost.csproj" />
+    <Project Path="src/LinkedInMcp.Core/LinkedInMcp.Core.csproj" />
+    <Project Path="src/LinkedInMcp.Server/LinkedInMcp.Server.csproj" />
+    <Project Path="src/LinkedInMcp.ServiceDefaults/LinkedInMcp.ServiceDefaults.csproj" />
+    <Project Path="src/LinkedInMcp.Worker/LinkedInMcp.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LinkedInMcp.Server.Tests/LinkedInMcp.Server.Tests.csproj" />
+  </Folder>
+</Solution>
