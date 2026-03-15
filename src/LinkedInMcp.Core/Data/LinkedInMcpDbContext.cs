@@ -10,6 +10,8 @@ public sealed class LinkedInMcpDbContext(DbContextOptions<LinkedInMcpDbContext> 
 
     public DbSet<LinkedInOrganizationAccess> LinkedInOrganizationAccess => Set<LinkedInOrganizationAccess>();
 
+    public DbSet<PublishedLinkedInPost> PublishedLinkedInPosts => Set<PublishedLinkedInPost>();
+
     public DbSet<RateLimitLedgerEntry> RateLimitLedger => Set<RateLimitLedgerEntry>();
 
     public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
@@ -31,6 +33,13 @@ public sealed class LinkedInMcpDbContext(DbContextOptions<LinkedInMcpDbContext> 
         modelBuilder.Entity<LinkedInOrganizationAccess>()
             .HasIndex(access => new { access.ConnectionId, access.OrganizationUrn })
             .IsUnique();
+
+        modelBuilder.Entity<PublishedLinkedInPost>()
+            .HasIndex(post => post.PostUrn)
+            .IsUnique();
+
+        modelBuilder.Entity<PublishedLinkedInPost>()
+            .HasIndex(post => post.ExternalPostId);
 
         modelBuilder.Entity<RateLimitLedgerEntry>()
             .HasIndex(entry => new { entry.DayUtc, entry.EndpointKey, entry.BucketType, entry.BucketId })

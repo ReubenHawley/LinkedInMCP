@@ -17,6 +17,7 @@ public sealed class CapabilityServiceTests
                 UserInfo = true,
                 MemberPosting = true,
                 OrganizationPosting = true,
+                PostAnalytics = true,
                 AdsManagement = true,
                 AdsReporting = true,
                 Webhooks = true
@@ -30,13 +31,16 @@ public sealed class CapabilityServiceTests
             Status = "active",
             AuthType = "oidc",
             HasRefreshToken = true,
-            ScopeCsv = "openid,w_member_social,rw_organization_admin,r_ads_reporting"
+            ScopeCsv = "openid",
+            ValidatedScopeCsv = "openid,w_member_social,rw_organization_admin,r_ads_reporting,r_organization_social",
+            TokenStatus = "active"
         });
 
         Assert.True(snapshot.connected);
         Assert.True(snapshot.features.userinfo);
         Assert.True(snapshot.features.publish_member_post);
         Assert.True(snapshot.features.publish_org_post);
+        Assert.True(snapshot.features.post_analytics);
         Assert.True(snapshot.features.ads_reporting);
         Assert.True(snapshot.features.webhooks);
     }

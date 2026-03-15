@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\LinkedInMcp.Server\LinkedInMcp.Server.csproj" />
-    <ProjectReference Include="..\..\src\LinkedInMcp.Core\LinkedInMcp.Core.csproj" />
+    <ProjectReference Include="..\..\src\LinkedInMcp.Server\LinkedInMcp.Server.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="..\..\src\LinkedInMcp.Core\LinkedInMcp.Core.csproj" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
 
 </Project>

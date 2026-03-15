@@ -60,23 +60,32 @@ public sealed class LinkedInTools(LinkedInConnectionService connectionService)
         CancellationToken cancellationToken = default)
         => (await connectionService.GetOrganizationAsync(ParseRequiredGuid(connectionId), organizationUrn, cancellationToken)).roles;
 
-    [McpServerTool, Description("Reserved entry point for member post publishing once the live LinkedIn payload contract is enabled.")]
-    public OperationResult linkedin_create_member_post(
-        [Description("The LinkedIn connection id.")] string connectionId,
-        [Description("Plain text post body.")] string text)
-        => connectionService.CreateUnsupportedResult("Member post publishing");
+    [McpServerTool, Description("Synchronizes organization access and roles for a LinkedIn connection using the organization ACL APIs.")]
+    public Task<OrganizationSyncResult> linkedin_sync_organizations(
+        [Description("Optional LinkedIn connection id. Defaults to the most recently updated connection.")] string? connectionId = null,
+        CancellationToken cancellationToken = default)
+        => connectionService.SyncOrganizationsAsync(ParseOptionalGuid(connectionId), cancellationToken);
 
-    [McpServerTool, Description("Reserved entry point for organization post publishing once the live LinkedIn payload contract is enabled.")]
-    public OperationResult linkedin_create_organization_post(
+    [McpServerTool, Description("Publishes a text post on behalf of the connected LinkedIn member.")]
+    public Task<PostPublishResult> linkedin_create_member_post(
+        [Description("The LinkedIn connection id.")] string connectionId,
+        [Description("Plain text post body.")] string text,
+        CancellationToken cancellationToken = default)
+        => connectionService.CreateMemberPostAsync(ParseRequiredGuid(connectionId), text, cancellationToken);
+
+    [McpServerTool, Description("Publishes a text post on behalf of an organization after role validation.")]
+    public Task<PostPublishResult> linkedin_create_organization_post(
         [Description("The LinkedIn connection id.")] string connectionId,
         [Description("The LinkedIn organization URN.")] string organizationUrn,
-        [Description("Plain text post body.")] string text)
-        => connectionService.CreateUnsupportedResult("Organization post publishing");
+        [Description("Plain text post body.")] string text,
+        CancellationToken cancellationToken = default)
+        => connectionService.CreateOrganizationPostAsync(ParseRequiredGuid(connectionId), organizationUrn, text, cancellationToken);
 
-    [McpServerTool, Description("Reserved entry point for LinkedIn post analytics once the live reporting contract is enabled.")]
-    public OperationResult linkedin_get_post_analytics(
-        [Description("A LinkedIn post URN or server-side post identifier.")] string postId)
-        => connectionService.CreateUnsupportedResult("Post analytics");
+    [McpServerTool, Description("Returns normalized analytics for a LinkedIn post using social actions and organization share statistics when available.")]
+    public Task<PostAnalyticsSnapshot> linkedin_get_post_analytics(
+        [Description("A LinkedIn post URN or server-side post identifier.")] string postId,
+        CancellationToken cancellationToken = default)
+        => connectionService.GetPostAnalyticsAsync(postId, cancellationToken);
 
     [McpServerTool, Description("Refreshes the access token for a stored LinkedIn connection.")]
     public Task<ConnectionStatusResponse> linkedin_refresh_connection(
