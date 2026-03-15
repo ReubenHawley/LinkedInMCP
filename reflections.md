@@ -72,3 +72,35 @@ This was a documentation-only change, but the main risk was accuracy drift. The 
 ### Next-Time Rules
 - If a user asks for a roadmap in a README, then I will derive version boundaries from the current implementation gaps instead of writing generic future-feature bullets.
 - If a roadmap touches gated external APIs, then I will phrase those items as approval-dependent unless the repo already proves that access exists.
+
+## Add open source policy files - 2026-03-15T09:56:34.8984461+01:00
+### Situation
+The user decided to open the repository to outside contributors but wanted to gate contributions and reduce legal risk. The repo did not yet include a license, contribution rules, conduct standards, or a security disclosure policy.
+
+### Task
+I needed to add an Apache 2.0 license and create `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md` in a way that supports open-source collaboration without inventing unsupported contacts or overpromising process.
+
+### Action
+I checked the repo state, confirmed the files were missing, used the official Apache 2.0 text, and added a contribution guide that requires DCO sign-off and sets expectations for scoped PRs, tests, and legal cleanliness. I added a Contributor Covenant based code of conduct and a conservative security policy that points reporters to private GitHub reporting paths instead of inventing an email address. I also updated the README so it now links to the new policy files and reflects that the repository is licensed.
+
+### Result
+The repository now has the baseline policy package expected for an open-source project:
+- `LICENSE` with Apache-2.0
+- `CONTRIBUTING.md` with DCO and PR requirements
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- README links and status updated to match
+
+### Reflection
+The main constraint was contact information: a security policy and code of conduct often assume a dedicated email, but the repo did not provide one. The safest move was to use GitHub private channels rather than inventing a reporting address. The DCO requirement also fits the user’s stated goal better than a heavier CLA process for now.
+
+### State & Artifacts
+- Added: `LICENSE`
+- Added: `CONTRIBUTING.md`
+- Added: `CODE_OF_CONDUCT.md`
+- Added: `SECURITY.md`
+- Updated: `README.md`
+
+### Next-Time Rules
+- If a repo needs legal/policy files and no reporting email exists, then I will use private GitHub reporting language instead of fabricating a contact method.
+- If a user wants open contribution with lightweight gating, then I will pair Apache-2.0 with a DCO-based `CONTRIBUTING.md` before suggesting a heavier CLA process.

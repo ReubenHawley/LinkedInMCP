@@ -180,9 +180,16 @@ tests/
 - [src/LinkedInMcp.Server](./src/LinkedInMcp.Server): MCP host entry point and tool/resource surface
 - [src/LinkedInMcp.Core](./src/LinkedInMcp.Core): shared OAuth, webhook, persistence, and capability logic
 - [tests/LinkedInMcp.Server.Tests](./tests/LinkedInMcp.Server.Tests): executable verification for current behavior
+- [CONTRIBUTING.md](./CONTRIBUTING.md): contribution workflow, DCO requirement, and PR expectations
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md): community participation standards
+- [SECURITY.md](./SECURITY.md): private vulnerability reporting guidance
+
+## License
+
+Licensed under [Apache License 2.0](./LICENSE).
 
 ## Repository status
 
 - Build status in this workspace: `dotnet build LinkedInMCP.slnx` passed
 - Test status in this workspace: `dotnet test tests/LinkedInMcp.Server.Tests/LinkedInMcp.Server.Tests.csproj --no-build` passed
-- No `LICENSE` file or contribution guide is included in the repository yet
+- Open-source policy files are now present: `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and `SECURITY.md`
