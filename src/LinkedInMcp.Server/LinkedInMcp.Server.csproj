@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LinkedInMcp.Core\LinkedInMcp.Core.csproj" />
-    <ProjectReference Include="..\LinkedInMcp.ServiceDefaults\LinkedInMcp.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,6 +12,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-LinkedInMcp.Server-c0ec2060-cfe5-41ea-a7d2-8ac53df9ff68</UserSecretsId>
   </PropertyGroup>
 
 </Project>

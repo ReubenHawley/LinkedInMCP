@@ -1,5 +1,4 @@
 using LinkedInMcp.Core.Services;
-using LinkedInMcp.ServiceDefaults;
 using LinkedInMcp.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);

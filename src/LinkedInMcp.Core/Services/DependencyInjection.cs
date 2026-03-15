@@ -30,7 +30,12 @@ public static class DependencyInjection
         });
 
         services.AddScoped<LinkedInCapabilityService>();
+        services.AddScoped<LinkedInApiClient>();
+        services.AddScoped<LinkedInTokenService>();
         services.AddScoped<LinkedInBackgroundJobService>();
+        services.AddScoped<LinkedInOrganizationSyncService>();
+        services.AddScoped<LinkedInPostService>();
+        services.AddScoped<LinkedInAnalyticsService>();
         services.AddScoped<LinkedInWebhookService>();
         services.AddScoped<LinkedInConnectionService>();
 

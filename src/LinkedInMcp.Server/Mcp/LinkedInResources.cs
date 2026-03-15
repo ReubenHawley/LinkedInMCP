@@ -30,6 +30,16 @@ public sealed class LinkedInResources(LinkedInConnectionService connectionServic
             await connectionService.GetProfileAsync(Guid.Parse(connectionId), refreshFromLinkedIn: false, cancellationToken));
 
     [McpServerResource(
+        UriTemplate = "linkedin://connections/{connectionId}/organizations",
+        Name = "LinkedIn Connection Organizations",
+        MimeType = "application/json")]
+    [Description("Returns all cached LinkedIn organizations for a connection.")]
+    public async Task<TextResourceContents> GetOrganizations(string connectionId, CancellationToken cancellationToken)
+        => JsonResource(
+            $"linkedin://connections/{connectionId}/organizations",
+            await connectionService.ListOrganizationsAsync(Guid.Parse(connectionId), cancellationToken));
+
+    [McpServerResource(
         UriTemplate = "linkedin://organizations/{connectionId}/{organizationUrn}",
         Name = "LinkedIn Organization Snapshot",
         MimeType = "application/json")]

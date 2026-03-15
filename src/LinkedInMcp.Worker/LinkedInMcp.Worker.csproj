@@ -13,6 +13,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LinkedInMcp.Core\LinkedInMcp.Core.csproj" />
-    <ProjectReference Include="..\LinkedInMcp.ServiceDefaults\LinkedInMcp.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>

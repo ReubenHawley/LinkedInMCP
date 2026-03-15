@@ -25,15 +25,25 @@ public sealed class LinkedInConnection
 
     public string ScopeCsv { get; set; } = string.Empty;
 
+    public string ValidatedScopeCsv { get; set; } = string.Empty;
+
     public string? AccessTokenProtected { get; set; }
 
     public string? RefreshTokenProtected { get; set; }
 
     public bool HasRefreshToken { get; set; }
 
+    [MaxLength(32)]
+    public string TokenStatus { get; set; } = "unknown";
+
+    [MaxLength(256)]
+    public string MemberUrn { get; set; } = string.Empty;
+
     public DateTimeOffset? AccessTokenExpiresAtUtc { get; set; }
 
     public DateTimeOffset? RefreshTokenExpiresAtUtc { get; set; }
+
+    public DateTimeOffset? LastValidatedAtUtc { get; set; }
 
     public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 
@@ -78,7 +88,53 @@ public sealed class LinkedInOrganizationAccess
 
     public string RolesCsv { get; set; } = string.Empty;
 
+    [MaxLength(32)]
+    public string SyncStatus { get; set; } = "cached";
+
+    public string? SourceMetadataJson { get; set; }
+
     public DateTimeOffset LastSyncedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+}
+
+public sealed class PublishedLinkedInPost
+{
+    [Key]
+    public Guid Id { get; set; } = Guid.NewGuid();
+
+    [ForeignKey(nameof(Connection))]
+    public Guid ConnectionId { get; set; }
+
+    public LinkedInConnection? Connection { get; set; }
+
+    [MaxLength(128)]
+    public string ExternalPostId { get; set; } = string.Empty;
+
+    [MaxLength(256)]
+    public string PostUrn { get; set; } = string.Empty;
+
+    [MaxLength(32)]
+    public string AuthorType { get; set; } = "member";
+
+    [MaxLength(256)]
+    public string AuthorUrn { get; set; } = string.Empty;
+
+    [MaxLength(256)]
+    public string? OrganizationUrn { get; set; }
+
+    [MaxLength(32)]
+    public string Status { get; set; } = "published";
+
+    [MaxLength(32)]
+    public string UpstreamMode { get; set; } = "rest_posts";
+
+    [MaxLength(3000)]
+    public string Text { get; set; } = string.Empty;
+
+    public string? RawResponseJson { get; set; }
+
+    public DateTimeOffset PublishedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+
+    public DateTimeOffset CreatedAtUtc { get; set; } = DateTimeOffset.UtcNow;
 }
 
 public sealed class RateLimitLedgerEntry

@@ -104,3 +104,114 @@ The main constraint was contact information: a security policy and code of condu
 ### Next-Time Rules
 - If a repo needs legal/policy files and no reporting email exists, then I will use private GitHub reporting language instead of fabricating a contact method.
 - If a user wants open contribution with lightweight gating, then I will pair Apache-2.0 with a DCO-based `CONTRIBUTING.md` before suggesting a heavier CLA process.
+
+## Implement V2 LinkedIn workflows - 2026-03-15T10:31:00.0000000+01:00
+### Situation
+The repository already had the v1 MCP surface and Aspire scaffold, but the V2 plan from `design.md` was still mostly unimplemented. Posting and analytics tools returned placeholder results, organization access stayed cache-only, token validation was optimistic, and the README still described V2 behavior as future work.
+
+### Task
+I needed to turn the V2 plan into real code: add a proper LinkedIn connector and token lifecycle layer, make member/org posting and post analytics live, add explicit organization sync, persist post receipts and token validation state, update the MCP surface and resources, and extend tests around the new workflows.
+
+### Action
+I split the old monolithic connection logic into focused services under `src/LinkedInMcp.Core`: `LinkedInApiClient`, `LinkedInTokenService`, `LinkedInOrganizationSyncService`, `LinkedInPostService`, and `LinkedInAnalyticsService`. I extended the data model with validated scopes, token status, member URNs, organization sync metadata, and persisted `PublishedLinkedInPost` records. I rewrote `LinkedInConnectionService` to orchestrate introspection-backed OAuth completion, refresh-aware authorized calls, organization sync, live publishing, analytics retrieval, and revocation handling. On the server side I exposed the new `linkedin_sync_organizations` tool, converted the three stubbed tools into async live workflows, and added the connection organizations resource. I also updated app settings and README so the documented behavior matches the new V2 implementation. During verification, I found that the tiny `LinkedInMcp.ServiceDefaults` project reference was triggering a .NET SDK workload-resolver failure during project-reference evaluation in this sandbox, so I inlined those extensions into the server and worker to keep the actual LinkedIn projects buildable without changing the Aspire AppHost direction.
+
+### Result
+The repository now has a real V2 implementation path:
+- OAuth completion persists introspected scope and token state.
+- Organization sync populates cached org access from LinkedIn ACLs.
+- Member and organization posting write real publish receipts.
+- Post analytics merges social-action metrics with organization share statistics when available.
+- MCP tools/resources expose the new sync and analytics-capable surface.
+- Core, server, and worker projects build successfully in the current environment.
+
+The remaining verification gap is environmental rather than code-level: the xUnit test project and Aspire AppHost still hit the SDK workload-resolver bug in this sandbox, so I could not complete a full `dotnet test` or AppHost build here.
+
+### Reflection
+The biggest implementation risk was overbuilding against LinkedIn without live credentials. The practical answer was to keep the connector strict on headers, versioning, tunneling, and error normalization, but design it around fakeable HTTP so the behavior can still be validated locally. The second lesson is that tiny helper projects can become build liabilities in constrained environments; inlining the service-default extensions was a better tradeoff than burning more time on the SDK bug.
+
+### State & Artifacts
+- Updated: `src/LinkedInMcp.Core/Configuration/LinkedInOptions.cs`
+- Updated: `src/LinkedInMcp.Core/Data/Entities.cs`
+- Updated: `src/LinkedInMcp.Core/Data/LinkedInMcpDbContext.cs`
+- Updated: `src/LinkedInMcp.Core/Models/Contracts.cs`
+- Updated: `src/LinkedInMcp.Core/Services/DependencyInjection.cs`
+- Updated: `src/LinkedInMcp.Core/Services/LinkedInCapabilityService.cs`
+- Replaced: `src/LinkedInMcp.Core/Services/LinkedInConnectionService.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInApiClient.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInApiException.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInTokenService.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInOrganizationSyncService.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInPostService.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInAnalyticsService.cs`
+- Added: `src/LinkedInMcp.Core/Services/LinkedInConnectionExtensions.cs`
+- Updated: `src/LinkedInMcp.Server/Mcp/LinkedInTools.cs`
+- Updated: `src/LinkedInMcp.Server/Mcp/LinkedInResources.cs`
+- Updated: `src/LinkedInMcp.Server/Program.cs`
+- Updated: `src/LinkedInMcp.Server/LinkedInMcp.Server.csproj`
+- Added: `src/LinkedInMcp.Server/ServiceDefaultsExtensions.cs`
+- Updated: `src/LinkedInMcp.Server/appsettings.json`
+- Updated: `src/LinkedInMcp.Worker/Program.cs`
+- Updated: `src/LinkedInMcp.Worker/LinkedInMcp.Worker.csproj`
+- Added: `src/LinkedInMcp.Worker/ServiceDefaultsExtensions.cs`
+- Updated: `tests/LinkedInMcp.Server.Tests/CapabilityServiceTests.cs`
+- Added: `tests/LinkedInMcp.Server.Tests/LinkedInWorkflowTests.cs`
+- Updated: `README.md`
+
+### Next-Time Rules
+- If a V2 plan depends on a third-party API that cannot be exercised live, then I will implement a fakeable HTTP client layer first so the workflow logic stays testable.
+- If project-reference evaluation fails because of SDK workload resolution in a constrained environment, then I will look for the smallest dependency edge to remove before changing larger architecture decisions.
+
+## Fix Aspire dashboard bootstrap defaults - 2026-03-15T10:45:00.0000000+01:00
+### Situation
+Running the AppHost failed before any project resources started. Aspire threw an `OptionsValidationException` because the dashboard bootstrap expected `ASPNETCORE_URLS` plus at least one OTLP endpoint environment variable, but none were present in the launch path being used.
+
+### Task
+I needed to make the AppHost resilient when launched outside an IDE-generated Aspire profile while preserving the intended local inner development loop with the dashboard enabled.
+
+### Action
+I checked the AppHost code and package documentation, confirmed the installed Aspire version expects `ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL` / `ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL`, and added a bootstrap helper in `src/LinkedInMcp.AppHost/Program.cs` that sets default local dashboard URLs when those variables are absent. I also switched the builder creation to `DistributedApplication.CreateBuilder(new DistributedApplicationOptions { Args = args, AllowUnsecuredTransport = true })` so the default HTTP endpoints are accepted for local development. To make IDE and `dotnet run` launches consistent, I added `src/LinkedInMcp.AppHost/Properties/launchSettings.json` with the same dashboard endpoint values.
+
+### Result
+The source now has explicit, stable Aspire dashboard defaults instead of depending on external launch machinery. The AppHost should start with:
+- dashboard frontend: `http://127.0.0.1:18888`
+- OTLP gRPC: `http://127.0.0.1:18889`
+- OTLP HTTP: `http://127.0.0.1:18890`
+
+I could not rebuild the AppHost binary inside this sandbox because the same SDK workload-resolver issue that affected AppHost verification earlier is still blocking direct AppHost builds here, so runtime verification is limited to the source fix.
+
+### Reflection
+This failure mode is a good example of why local orchestration projects need explicit defaults even when templates often rely on launch-profile generation. The safest fix was to make the AppHost self-sufficient first and keep the launch profile as reinforcement rather than the only source of truth.
+
+### State & Artifacts
+- Updated: `src/LinkedInMcp.AppHost/Program.cs`
+- Added: `src/LinkedInMcp.AppHost/Properties/launchSettings.json`
+
+### Next-Time Rules
+- If Aspire dashboard startup depends on environment variables that may be absent outside IDE launch profiles, then I will set conservative local defaults in the AppHost source as well as in `launchSettings.json`.
+- If an AppHost runtime issue can be isolated to bootstrap configuration, then I will verify against the package docs and patch the launch path before changing service resources or Aspire topology.
+
+## Tighten local LinkedIn auth diagnostics - 2026-03-15T11:20:00.0000000+01:00
+### Situation
+The local LinkedIn OAuth flow was partly working, but the browser flow was still fragile for manual use. The MCP auth tool output had improved copy guidance, yet a failed LinkedIn browser round-trip could still leave the user with a vague LinkedIn interstitial or an unhelpful callback failure.
+
+### Task
+I needed to make the local auth loop easier to debug by surfacing the exact redirect URI in the MCP auth response, returning clearer callback diagnostics when LinkedIn redirects back with OAuth errors, and documenting the product/scope checks that commonly break local development.
+
+### Action
+I extended `AuthUrlResponse` with `redirectUri` and `configurationHint`, updated `LinkedInConnectionService.BeginAuthAsync` to populate those fields from the active options, and changed the `/auth/linkedin/callback` endpoint to handle `error` and `error_description` query parameters explicitly with troubleshooting output instead of relying on minimal API parameter binding. I also expanded the README authentication section to call out the exact local callback URL, scope guidance, the Sign In with LinkedIn using OpenID Connect requirement for OIDC scopes, and quick local checks before starting the browser flow. I then rebuilt the core and server projects using a repo-local `DOTNET_CLI_HOME` to avoid the sandbox's first-time-use restriction.
+
+### Result
+The MCP auth tool now tells the caller exactly which redirect URI must match the LinkedIn app configuration, and the local callback route returns actionable JSON when LinkedIn redirects back with an OAuth error. The README is also more explicit about scope expectations and local setup checks. Both `LinkedInMcp.Core` and `LinkedInMcp.Server` compile successfully after the changes.
+
+### Reflection
+When an OAuth flow spans an MCP client, a browser, a SaaS consent screen, and a local callback endpoint, small mismatches become hard to diagnose quickly. Exposing the active redirect URI and handling callback-side error query parameters directly is a better debugging posture than assuming the user can infer the failure from the provider's interstitial alone.
+
+### State & Artifacts
+- Updated: `src/LinkedInMcp.Core/Models/Contracts.cs`
+- Updated: `src/LinkedInMcp.Core/Services/LinkedInConnectionService.cs`
+- Updated: `src/LinkedInMcp.Server/Program.cs`
+- Updated: `README.md`
+
+### Next-Time Rules
+- If an OAuth tool returns a browser URL, then I will also return the exact redirect URI and a concise configuration hint so app-side mismatches are easier to spot.
+- If a callback endpoint may receive provider-side OAuth errors, then I will parse and surface those query parameters explicitly instead of relying on default parameter binding.
